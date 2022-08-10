@@ -9,7 +9,8 @@ jobs:
     docker:
       - image: rust:latest
     steps:
-      - checkout
+      - checkout:
+          path: ~/rust_projects
       - run:
           name: Version information
           command: rustc --version; cargo --version; rustup --version
