@@ -5,6 +5,7 @@ version: 2.1
 
 jobs:
   build:
+    working_directory: ~/rust_projects/guessing_game
     docker:
       - image: rust:latest
     steps:
