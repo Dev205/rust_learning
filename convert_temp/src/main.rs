@@ -1,48 +1,78 @@
 use std::io;
+use std::io::Write;
+use std::str::FromStr;
+
+struct ParseModeError {}
+
+enum Mode {
+    F2C,
+    C2F,
+}
+impl FromStr for Mode {
+    type Err = ParseModeError;
+
+    fn from_str(s: &str) -> Result<Mode, ParseModeError> {
+        match s {
+            "1" => Ok(Mode::F2C),
+            "2" => Ok(Mode::C2F),
+            _ => Err(ParseModeError {}),
+        }
+    }
+}
 
 fn main() {
+    println!("Welcome to the temperature converter!");
+
+    println!("Pick a conversion:");
+    println!("[1] Fahrenheit to Celsius");
+    println!("[2] Celsius to Fahrenheit");
+
+    let choice: Mode = read_value_from_input(
+        "> ",
+        "Please enter a valid choice (0 or 1)!"
+    );
+
+    match choice {
+        Mode::F2C => {
+            let temperature: f64 = read_value_from_input(
+                "Enter the temperature to convert: ",
+                "Please enter a valid floating point variable!"
+            );
+
+            println!(
+                "{:.2} °F is {:.2} °C.",
+                temperature,
+                (temperature - 32f64) * 5f64 / 9f64
+            );
+        },
+        Mode::C2F => {
+            let temperature: f64 = read_value_from_input(
+                "Enter the temperature to convert: ",
+                "Please enter a valid floating point variable!"
+            );
+
+            println!(
+                "{:.2} °C is {:.2} °F.",
+                temperature,
+                temperature * 9f64 / 5f64 + 32f64
+            );
+        },
+    }
+}
+
+fn read_value_from_input<T: FromStr>(prompt: &str, error_message: &str) -> T {
     loop {
-        println!("What would you like to convert: \n1) Fahrenheit to Celsius\n2) Celsius to Fahrenheit\n3) Quit");
-        let mut option = String::new();
+        print!("{}", prompt);
+        io::stdout().flush()
+            .expect("Unable to flush STDOUT!");
 
-        io::stdin()
-            .read_line(&mut option)
-            .expect("Failed to read input");
+        let mut input_value = String::new();
+        io::stdin().read_line(&mut input_value)
+            .expect("Unable to read STDIN!");
 
-        let option: u32 = match option.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-
-        if option == 3 {
-            println!("Quitting");
-            break;
+        match input_value.trim().parse() {
+            Ok(value) => return value,
+            Err(_) => println!("{}", error_message),
         }
-
-        println!("What degree value would you like to convert?");
-
-        let mut degree = String::new();
-
-        io::stdin()
-            .read_line(&mut degree)
-            .expect("Failed to read input");
-
-        let degree: f32 = match degree.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-
-        if option == 1 {
-            println!("Converting {degree} Fahrenheit to Celsius");
-            let celsius = (degree - 32.00) * (0.5556);
-            println!("Converted amount is {celsius} celsius\n");
-        }
-
-        if option == 2 {
-            println!("Converting {degree} Celsius to Fahrenheit");
-            let fahrenheit = (degree * 1.8) + 32.0;
-            println!("Converted amount is {fahrenheit} celsius\n");
-        }
-
     }
 }
